@@ -1,2 +1,3 @@
-# tablework
-working ideas on csv to postgres and agent
+# Tablework
+
+Natural language querying for structured CSV data.

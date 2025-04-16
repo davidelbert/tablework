@@ -1,7 +1,9 @@
-import ollama
+from ollama import Ollama
 
-# The model you want to use (must be installed locally via `ollama run llama3`, etc.)
-OLLAMA_MODEL = "llama3"  # or "mistral", "gemma", etc.
+OLLAMA_MODEL = "llama3"
+
+# Explicitly set the base URL so Docker can connect to host Ollama
+client = Ollama(base_url="http://host.docker.internal:11434")
 
 
 def query_handler(nl_query: str):
@@ -20,9 +22,8 @@ Convert the following question into an SQL query:
 Only return the SQL code, no explanation.
 """
 
-    response = ollama.chat(
+    response = client.chat(
         model=OLLAMA_MODEL, messages=[{"role": "user", "content": prompt}]
     )
-    sql = response["message"]["content"]
 
-    return {"query": nl_query, "sql": sql, "results": []}
+    return {"query": nl_query, "sql": response["message"]["content"], "results": []}

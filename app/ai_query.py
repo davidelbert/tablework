@@ -2,7 +2,6 @@ import os
 import psycopg2
 from langchain_community.llms import Ollama
 
-# Connect to your local Ollama server
 llm = Ollama(model="llama3", base_url="http://host.docker.internal:11434")
 
 
@@ -36,28 +35,39 @@ The table is named `entries` and has these columns:
 - pro, mat, smt, dsc, spl, cmt, apl: TEXT[] (lists of tags)
 - title, doi, pii, journal: TEXT
 
-To filter for values inside an array column like mat or dsc, use the syntax:
-'value' = ANY(column_name)
+When generating SQL:
+1. Only return these columns: index_id, title, doi, mat, dsc
+2. Never include "abstract" in the SELECT statement
+3. Always include a LIMIT and OFFSET for pagination
+   - Assume page size is 10
+   - If the user mentions "page 2", OFFSET should be 10
+   - "page 3" → OFFSET 20, and so on
+4. For fuzzy matches in arrays, use:
+   EXISTS (
+       SELECT 1 FROM unnest(column_name) AS val WHERE val ILIKE '%value%'
+   )
 
 Example:
-"Find entries where MAT includes Ti" → 'Ti' = ANY(mat)
+"Show page 1 of entries where MAT includes Ti" →
+SELECT index_id, title, doi, mat, dsc FROM entries 
+WHERE EXISTS (SELECT 1 FROM unnest(mat) AS val WHERE val ILIKE '%ti%') 
+LIMIT 10 OFFSET 0;
 
-Convert the following question into an SQL query:
+Now, convert the following natural language request into SQL:
 
 "{nl_query}"
 
-Only return the SQL code, no explanation.
+Only return the SQL query. No explanation.
 """
 
     sql = llm.invoke(prompt).strip()
 
-    # Remove markdown formatting if present
     if "```sql" in sql:
         sql = sql.split("```sql")[-1].split("```")[0].strip()
     elif "```" in sql:
         sql = sql.split("```")[1].split("```")[0].strip()
 
-    print("🔍 Generated SQL:\n", sql)
+    print("🔍 SQL:\n", sql)
 
     results = run_query(sql)
 

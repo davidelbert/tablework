@@ -65,7 +65,7 @@ docker compose build
 docker compose up
 ```
 
-This initializes PostgreSQL and runs `init.sql`. Starts the FastAPI agent at [http://localhost:8000](http://localhost:8000)
+This initializes PostgreSQL and runs `init.sql`. Starts the FastAPI agent at http://localhost:8000
 
 ---
 

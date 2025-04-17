@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS entries (
     journal TEXT
 );
 
+
 CREATE INDEX IF NOT EXISTS idx_pro ON entries USING GIN (pro);
 CREATE INDEX IF NOT EXISTS idx_mat ON entries USING GIN (mat);
 CREATE INDEX IF NOT EXISTS idx_smt ON entries USING GIN (smt);

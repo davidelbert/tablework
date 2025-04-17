@@ -20,11 +20,19 @@ conn = psycopg2.connect(
 
 cur = conn.cursor()
 
+success = 0
+fail = 0
+
 with open(CSV_PATH, newline="", encoding="utf-8") as csvfile:
     reader = csv.DictReader(csvfile)
 
-    for row in reader:
+    for i, row in enumerate(reader):
         try:
+            if not row.get("Index") or not row["Index"].isdigit():
+                print(f"⚠️ Skipping row {i}: Invalid or missing Index")
+                fail += 1
+                continue
+
             cur.execute(
                 """
                 INSERT INTO entries (
@@ -49,10 +57,17 @@ with open(CSV_PATH, newline="", encoding="utf-8") as csvfile:
                     row["journal"],
                 ),
             )
+            success += 1
+
         except Exception as e:
-            print(f"❌ Skipped row {row['Index']} due to error: {e}")
+            fail += 1
+            row_id = row.get("Index", f"row #{i}")
+            print(f"❌ Skipped {row_id} due to error: {e}")
 
 conn.commit()
 cur.close()
 conn.close()
+
 print("✅ Data load complete.")
+print(f"✅ Rows inserted: {success}")
+print(f"❌ Rows skipped: {fail}")

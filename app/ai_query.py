@@ -1,9 +1,6 @@
-from ollama import Ollama
+from langchain.llms import Ollama
 
-OLLAMA_MODEL = "llama3"
-
-# Explicitly set the base URL so Docker can connect to host Ollama
-client = Ollama(base_url="http://host.docker.internal:11434")
+llm = Ollama(model="llama3", base_url="http://host.docker.internal:11434")
 
 
 def query_handler(nl_query: str):
@@ -22,8 +19,5 @@ Convert the following question into an SQL query:
 Only return the SQL code, no explanation.
 """
 
-    response = client.chat(
-        model=OLLAMA_MODEL, messages=[{"role": "user", "content": prompt}]
-    )
-
-    return {"query": nl_query, "sql": response["message"]["content"], "results": []}
+    sql = llm.invoke(prompt)
+    return {"query": nl_query, "sql": sql, "results": []}

@@ -67,7 +67,7 @@ Only return the SQL query. No explanation.
     elif "```" in sql:
         sql = sql.split("```")[1].split("```")[0].strip()
 
-    print("🔍 SQL:\n", sql)
+    print(" SQL:\n", sql)
 
     results = run_query(sql)
 
